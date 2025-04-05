@@ -49,4 +49,17 @@ pub const Env = struct {
             return EnvFileError.NonExistantKey;
         }
     }
+    pub fn format(
+        self: @This(),
+        _: []const u8,
+        _: std.fmt.FormatOptions,
+        writer: anytype,
+    ) !void {
+        try writer.print("Env {{", .{});
+        var iter = self.envs.iterator();
+        while (iter.next()) |entry| {
+            try writer.print(" {s} = {s},", .{ entry.key_ptr.*, entry.value_ptr.* });
+        }
+        try writer.print("}}\n", .{});
+    }
 };
