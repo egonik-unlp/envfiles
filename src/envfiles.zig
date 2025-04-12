@@ -26,7 +26,7 @@ fn getEnv(filepath: []const u8, allocator: std.mem.Allocator) !std.StringHashMap
     const path = try dir.realpathAlloc(allocator, ".");
     defer file.close();
     std.debug.print("Folder path being read = {s}\n", .{path});
-    var buffer: [1000]u8 = undefined;
+    var buffer: [4096]u8 = undefined;
     const filepath_string = try std.os.getFdPath(file.handle, &buffer);
     std.debug.print("filepath = {s}\n", .{filepath_string});
     const text = try file.readToEndAlloc(allocator, 1000);
