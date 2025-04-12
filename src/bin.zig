@@ -1,4 +1,4 @@
-const lib = @import("envfiles_lib");
+const lib = @import("envfiles.zig");
 const std = @import("std");
 
 pub fn main() !void {

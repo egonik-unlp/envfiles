@@ -25,7 +25,10 @@ fn getEnv(filepath: []const u8, allocator: std.mem.Allocator) !std.StringHashMap
     const file = try dir.openFile(filepath, .{});
     const path = try dir.realpathAlloc(allocator, ".");
     defer file.close();
-    std.debug.print("File path being read = {s}", .{path});
+    std.debug.print("Folder path being read = {s}\n", .{path});
+    var buffer: [1000]u8 = undefined;
+    const filepath_string = try std.os.getFdPath(file.handle, &buffer);
+    std.debug.print("filepath = {s}\n", .{filepath_string});
     const text = try file.readToEndAlloc(allocator, 1000);
     var iter = std.mem.splitScalar(u8, text, '\n');
     while (iter.next()) |val_key| {
