@@ -21,7 +21,11 @@ fn sorrounded_by_quotations(haystack: []const u8) EnvFileSyntaxError!bool {
 
 fn getEnv(filepath: []const u8, allocator: std.mem.Allocator) !std.StringHashMap([]const u8) {
     var storage = std.StringHashMap([]const u8).init(allocator);
-    const file = try std.fs.cwd().openFile(filepath, .{});
+    const dir = std.fs.cwd();
+    const file = try dir.openFile(filepath, .{});
+    const path = try dir.realpathAlloc(allocator, ".");
+    defer file.close();
+    std.debug.print("File path being read = {s}", .{path});
     const text = try file.readToEndAlloc(allocator, 1000);
     var iter = std.mem.splitScalar(u8, text, '\n');
     while (iter.next()) |val_key| {
