@@ -18,7 +18,30 @@ fn sorrounded_by_quotations(haystack: []const u8) EnvFileSyntaxError!bool {
         return false;
     }
 }
+fn getEnvFromString(string: []const u8, allocator: std.mem.Allocator) !std.StringHashMap([]const u8) {
+    var storage = std.StringHashMap([]const u8).init(allocator);
 
+    var iter = std.mem.splitScalar(u8, string, '\n');
+    while (iter.next()) |val_key| {
+        if (std.mem.eql(u8, val_key, "")) {
+            std.debug.print("last", .{});
+            continue;
+        }
+        var split = std.mem.splitScalar(u8, val_key, '=');
+        const key = split.next().?;
+        var val = split.next().?;
+        if (split.next() != null) {
+            return EnvFileSyntaxError.MalformedKey;
+        }
+        const quotes = try sorrounded_by_quotations(val);
+        if (quotes) {
+            val = val[1 .. val.len - 1];
+        }
+        try storage.put(key, val);
+    }
+
+    return storage;
+}
 fn getEnv(filepath: []const u8, allocator: std.mem.Allocator) !std.StringHashMap([]const u8) {
     var storage = std.StringHashMap([]const u8).init(allocator);
     const dir = std.fs.cwd();
@@ -57,6 +80,10 @@ pub const Env = struct {
     envs: std.StringHashMap([]const u8),
     pub fn init(filepath: []const u8, allocator: std.mem.Allocator) !Env {
         const env = try getEnv(filepath, allocator);
+        return Env{ .allocator = allocator, .envs = env };
+    }
+    pub fn init_string(string: []const u8, allocator: std.mem.Allocator) !Env {
+        const env = try getEnvFromString(string, allocator);
         return Env{ .allocator = allocator, .envs = env };
     }
     pub fn getVal(self: Env, key: []const u8) EnvFileError![]const u8 {
